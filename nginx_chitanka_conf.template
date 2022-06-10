@@ -1,0 +1,35 @@
+server {
+        listen 80;
+
+        server_name ${VIRTUAL_HOST};
+        root /var/www/chitanka/web;
+
+        access_log /dev/stdout;
+        error_log /dev/stderr;
+
+        index index.php;
+
+        location / {
+                index index.php;
+                try_files $uri $uri/ /index.php$is_args$args;
+        }
+
+        location ~ /(index|index_dev)\.php($|/) {
+                fastcgi_pass app:9000;
+                fastcgi_split_path_info ^(.+\.php)(/.*)$;
+                fastcgi_param  SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+                include fastcgi_params;
+        }
+
+        location ~ /(css|js|thumb) {
+                expires 30d;
+                try_files /cache$request_uri @asset_generator;
+        }
+        location @asset_generator {
+                rewrite ^/(css|js|thumb)/(.+) /$1/index.php?$2;
+        }
+
+        location ~* \.(eot|otf|ttf|woff)$ {
+                add_header Access-Control-Allow-Origin *;
+        }
+}
