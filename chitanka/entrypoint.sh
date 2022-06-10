@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
+if [ "$1" = "php-fpm" ]; then
   if [ -f /run/secrets/chitanka_db_user ]; then
     MYSQL_USER=`cat /run/secrets/chitanka_db_user`
   fi
@@ -10,8 +10,8 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
   fi
 
   # generate the parameters.yml
-  if [ ! -e app/config/parameters.yml ]; then
-    touch app/config/parameters.yml
+  if [ ! -e /var/www/chitanka/app/config/parameters.yml ]; then
+    touch /var/www/chitanka/app/config/parameters.yml
     echo "Write config to $PWD/app/config/parameters.yml"
     echo "parameters:
     database_host: ${MYSQL_HOST}
@@ -21,13 +21,13 @@ if [[ "$1" == apache2* ]] || [ "$1" == php-fpm ]; then
     database_driver: pdo_mysql
     database_port: ${MYSQL_PORT:=3306}
     secret: \"$(head /dev/urandom | base64 | head -c 24)\"
-    " > app/config/parameters.yml
+    " > /var/www/chitanka/app/config/parameters.yml
   fi
 
   # initialize the DB
   if [ ! -e /var/www/chitanka/app/config/.db_initialized ]; then
      /wait-for-it.sh ${MYSQL_HOST}:${MYSQL_PORT:="3306"} -t 30
-     curl http://download.chitanka.info/chitanka.sql.gz | \
+     curl -fsSL http://download.chitanka.info/chitanka.sql.gz | \
      gunzip | \
      mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} -h ${MYSQL_HOST} ${MYSQL_DATABASE} && \
      touch /var/www/chitanka/app/config/.db_initialized || \

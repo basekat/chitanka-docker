@@ -42,8 +42,6 @@ RUN set -ex; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*
 
-VOLUME /var/www/chitanka
-
 # git clone the source and install dependencies
 RUN set -ex; \
 	\
@@ -61,6 +59,9 @@ RUN set -ex; \
     cd /var/www/chitanka && chmod -R 777 var/cache var/log var/spool web/cache; \
     curl -fsSL https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh > /wait-for-it.sh && \
     chmod 755 /wait-for-it.sh
+
+
+VOLUME /var/www/chitanka/app/config
 
 COPY *.sh /
 
