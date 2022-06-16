@@ -1,5 +1,5 @@
-FROM php:7.4-fpm-bullseye
-LABEL version="0.2"
+FROM php:7.2-fpm-buster
+LABEL version="0.3"
 LABEL description="chitanka.info"
 
 RUN set -ex; \
@@ -16,7 +16,7 @@ RUN set -ex; \
 		libcurl4-openssl-dev \
 		libxslt-dev \
 	; \
-	docker-php-ext-configure gd --with-freetype --with-jpeg; \
+	docker-php-ext-configure gd --with-freetype-dir=/usr --with-jpeg-dir=/usr; \
 	docker-php-ext-install -j "$(nproc)" \
 		gd \
 		curl \
