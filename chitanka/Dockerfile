@@ -1,6 +1,6 @@
-FROM php:7.2-fpm-buster
-LABEL version="0.3"
-LABEL description="chitanka.info"
+FROM php:7.4-fpm-bullseye
+LABEL version="0.4"
+LABEL description="chitanka.info on Docker"
 
 RUN set -ex; \
     \
@@ -16,7 +16,7 @@ RUN set -ex; \
 		libcurl4-openssl-dev \
 		libxslt-dev \
 	; \
-	docker-php-ext-configure gd --with-freetype-dir=/usr --with-jpeg-dir=/usr; \
+	docker-php-ext-configure gd --with-freetype --with-jpeg; \
 	docker-php-ext-install -j "$(nproc)" \
 		gd \
 		curl \
@@ -54,7 +54,7 @@ RUN set -ex; \
 	  git \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
-    git clone --depth 1 https://github.com/chitanka/chitanka-production.git /var/www/chitanka; \
+    git clone --depth 1 --branch chitanka.info https://github.com/chitanka/chitanka-production.git /var/www/chitanka; \
     chown -R www-data:www-data /var/www/chitanka; \
     cd /var/www/chitanka && chmod -R 777 var/cache var/log var/spool web/cache; \
     curl -fsSL https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh > /wait-for-it.sh && \

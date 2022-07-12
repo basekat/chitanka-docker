@@ -225,7 +225,7 @@ docker-compose up -d
 Ако искате да генерирате собствен image за `app` контейнера:
 ```console
 cd chitanka
-git build -t chitanka-local
+docker build -t chitanka-local
 ```
 
 Променете в docker-compose.yml, заменете:
