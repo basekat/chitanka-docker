@@ -1,5 +1,5 @@
 FROM php:7.4-fpm-bullseye
-LABEL version="0.4"
+LABEL version="1.1"
 LABEL description="chitanka.info on Docker"
 
 RUN set -ex; \
@@ -54,7 +54,7 @@ RUN set -ex; \
 	  git \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
-    git clone --depth 1 --branch chitanka.info https://github.com/chitanka/chitanka-production.git /var/www/chitanka; \
+    git clone --depth 1 --branch master https://github.com/chitanka/chitanka-production.git /var/www/chitanka; \
     chown -R www-data:www-data /var/www/chitanka; \
     cd /var/www/chitanka && chmod -R 777 var/cache var/log var/spool web/cache; \
     curl -fsSL https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh > /wait-for-it.sh && \
