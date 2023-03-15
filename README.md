@@ -6,8 +6,8 @@
 # Как да използваме?
 
 ```console
-git clone https://github.com/basecat/chitanka-docker chitanka
-cd chitanka
+$ git clone https://github.com/basecat/chitanka-docker chitanka
+$ cd chitanka
 ... създайте docker-compose.yml
 docker-compose up -d
 ```
@@ -44,6 +44,7 @@ services:
   db:
     image: mariadb:10.5
     restart: always
+    command: --collation-server=utf8mb4_unicode_ci --character-set-server=utf8mb4 --skip-character-set-client-handshake
     volumes:
       - db:/var/lib/mysql
     environment:
@@ -118,6 +119,7 @@ volumes:
   db:
     image: mariadb:10.5
     restart: always
+    command: --collation-server=utf8mb4_unicode_ci --character-set-server=utf8mb4 --skip-character-set-client-handshake
     volumes:
       - db:/var/lib/mysql
     environment:
