@@ -6,7 +6,7 @@
 # Как да използваме?
 
 ```console
-$ git clone https://github.com/basecat/chitanka-docker chitanka
+$ git clone https://github.com/basekat/chitanka-docker.git chitanka
 $ cd chitanka
 ... създайте docker-compose.yml
 docker-compose up -d
