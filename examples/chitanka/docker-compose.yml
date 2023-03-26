@@ -1,0 +1,66 @@
+version: "3"
+
+
+services:
+  db:
+    image: mariadb:10.5
+    command: --collation-server=utf8mb4_unicode_ci --character-set-server=utf8mb4 --skip-character-set-client-handshake
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    env_file:
+     - db.env
+
+  app:
+    image: basekat/chitanka
+    restart: always
+    volumes:
+      - config:/var/www/chitanka/app/config
+      - app:/var/www/chitanka
+      - ./content:/var/www/chitanka/web/content:z
+    environment:
+      - MYSQL_HOST=db
+    env_file:
+      - db.env
+    extra_hosts:
+      - "chitanka.local:127.0.0.1"
+    depends_on:
+      - db
+
+  web:
+    image: nginx
+    restart: always
+    environment:
+      - VIRTUAL_HOST=chitanka.local
+    extra_hosts:
+      - "chitanka.local:127.0.0.1"
+    ports:
+      - 8080:80
+    depends_on:
+      - app
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:z
+      - ./nginx_chitanka_conf.template:/etc/nginx/templates/default.conf.template:z
+    volumes_from:
+      - app
+
+  cron:
+    image: basekat/chitanka
+    restart: always
+    environment:
+      - TZ=Europe/Sofia
+      - CHITANKA_CRON=57 03 * * *
+    extra_hosts:
+      - "chitanka.local:127.0.0.1"
+    entrypoint: /cron.sh
+    depends_on:
+      - db
+      - app
+    volumes_from:
+      - app
+
+volumes:
+    db:
+    config:
+    content:
+    app:
