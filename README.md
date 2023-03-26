@@ -26,6 +26,8 @@ $ mkdir 777 /path/to/content
 OR
 $ chown 33:33 /path/to/content
 ```
+Стартирате
+```
 docker-compose up -d
 ```
 
