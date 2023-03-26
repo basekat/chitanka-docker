@@ -6,9 +6,26 @@
 # Как да използваме?
 
 ```console
-$ git clone https://github.com/basecat/chitanka-docker chitanka
-$ cd chitanka
-... създайте docker-compose.yml
+$ git clone https://github.com/basekat/chitanka-docker
+$ cd chitanka-docker/examples/chitanka
+... прегледайте docker-compose.yml
+```
+!!! ВАЖНО !!! Укажете пътя до content директорията, която ще съдържа архива (~20GB) с всички книги, корици и т.н.
+```
+ app:
+    image: basekat/chitanka
+    restart: always
+    volumes:
+      ....
+      - /path/to/content:/var/www/chitanka/web/content  !!! ВАЖНО !!!
+```
+Уверете се, че пътят то content директорията съществува и правата са 777 или принадлежат на потребител:група 33:33
+```
+$ mkdir -p /path/to/content
+$ mkdir 777 /path/to/content
+OR
+$ chown 33:33 /path/to/content
+```
 docker-compose up -d
 ```
 
@@ -37,79 +54,6 @@ www-data@277af26280d7:~/chitanka$ ./bin/update
 21:48:28: Done.
 ```
 
-```
-version: '3'
-
-services:
-  db:
-    image: mariadb:10.5
-    restart: always
-    command: --collation-server=utf8mb4_unicode_ci --character-set-server=utf8mb4 --skip-character-set-client-handshake
-    volumes:
-      - db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=chitankamysqlrootpassword
-      - MYSQL_DATABASE=chitanka
-      - MYSQL_USER=chitanka
-      - MYSQL_PASSWORD=chitanka
-
-  app:
-    image: basekat/chitanka
-    restart: always
-    volumes:
-      - config:/var/www/chitanka/app/config
-      - app:/var/www/chitanka
-      - content:/var/www/chitanka/web/content
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_DATABASE=chitanka
-      - MYSQL_USER=chitanka
-      - MYSQL_PASSWORD=chitanka
-    extra_hosts:
-      - "chitanka.local:127.0.0.1"
-    depends_on:
-      - db
-
-  web:
-    image: nginx
-    restart: always
-    environment:
-      - VIRTUAL_HOST=chitanka.local
-    extra_hosts:
-      - "chitanka.local:127.0.0.1"
-    ports:
-      - 80:80
-    depends_on:
-      - app
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx_chitanka_conf.template:/etc/nginx/templates/default.conf.template
-    volumes_from:
-      - app
-
-  cron:
-    image: basekat/chitanka
-    restart: always
-    environment:
-      - TZ=Europe/Sofia
-      - CHITANKA_CRON=57 01 * * *
-    extra_hosts:
-      - "chitanka.local:127.0.0.1"
-    entrypoint: /cron.sh
-    depends_on:
-      - db
-      - app
-    volumes_from:
-      - app
-
-volumes:
-    db:
-    config:
-    content:
-    app:
-```
-
-
 # Информация за отделните услуги
 
 ## `db`
@@ -122,16 +66,13 @@ volumes:
     command: --collation-server=utf8mb4_unicode_ci --character-set-server=utf8mb4 --skip-character-set-client-handshake
     volumes:
       - db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=chitankamysqlrootpassword
-      - MYSQL_DATABASE=chitanka
-      - MYSQL_USER=chitanka
-      - MYSQL_PASSWORD=chitanka
 ```
 
 ## `app`
 
 `app` контейнерът съдържа изходния код на [Моята Библиотека](https://https://github.com/chitanka). Скриптовете за генерирането му можете да намерите в текущото хранилище.
+
+
 ```
   app:
     image: basekat/chitanka
@@ -139,30 +80,17 @@ volumes:
     volumes:
       - config:/var/www/chitanka/app/config
       - app:/var/www/chitanka
-      - content:/var/www/chitanka/web/content
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_DATABASE=chitanka
-      - MYSQL_USER=chitanka
-      - MYSQL_PASSWORD=chitanka
-    extra_hosts:
-      - "chitanka.local:127.0.0.1"
-    depends_on:
-      - db
-```
-
-Следните параметри трябва да имат същите стойности както при `db` контейнера.
-```
-      - MYSQL_DATABASE=chitanka
-      - MYSQL_USER=chitanka
-      - MYSQL_PASSWORD=chitanka
+      - ./content:/var/www/chitanka/web/content
 ```
 
 Следните volumes са дефинирани:
 - `config:/var/www/chitanka/app/config` - Различни конфигурационни файлов
 - `app:/var/www/chitanka` - Изходен код
-- `content:/var/www/chitanka/web/content` - Съдържанието на Моята библиотека. Към момента големината на архива е около 17 GB.
+- `./content:/var/www/chitanka/web/content` - Съдържанието на Моята библиотека.
 
+Важно е да укажете пътя до content директорията, която ще съдържа архива (~20GB) с всички книги, корици и т.н. Уверете се, че имате около 20ГБ свободно място.
+Също така, трябва да я създадете предварително и да се уверите, че потребител с UID/GUID 33/33 (www-data) има права за писане в нея. В противен случай, Docker ще създаде
+volume и ще го монтира като потребител root контейнера. Това ще предоврати www-data да синхрониза съдържанието на тази директория.
 
 ## `web`
 
@@ -220,6 +148,13 @@ ports:
 docker-compose down
 docker-compose pull
 docker-compose up -d
+```
+
+# Изтриване на всичко
+
+Ако искате да започнете наново и да изтриете всички volume (без content), можете да използвате следната команда:
+```console
+docker-compose down -v
 ```
 
 # Създаване на собствен chitanka image
